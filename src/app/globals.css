@@ -48,6 +48,15 @@
 }
 
 :root {
+  /* Tune / Figma design tokens */
+  --tune-bg: #f2f4f8;
+  --tune-card-border: #dde1e6;
+  --tune-text: #21272a;
+  --tune-muted: #697077;
+  --tune-border: #c1c7cd;
+  --tune-primary: #0f62fe;
+  --tune-primary-dark: #001d6c;
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
