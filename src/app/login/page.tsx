@@ -92,7 +92,7 @@ export default function Login() {
             <FieldGroup>
               <Field>
                 <FieldLabel htmlFor="login-email">
-                  使用者名稱<span className="text-destructive">*</span>
+                  電子郵件<span className="text-destructive">*</span>
                 </FieldLabel>
                 <Input
                   id="username"
