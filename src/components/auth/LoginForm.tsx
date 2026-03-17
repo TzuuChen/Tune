@@ -140,7 +140,8 @@ export function LoginForm({
           </Field>
         </FieldGroup>
 
-        <div className="flex items-center justify-between gap-4">
+        {/* 忘記密碼功能待實作 */}
+        {/* <div className="flex items-center justify-between gap-4">
           <label className="flex cursor-pointer items-center gap-2">
             <Checkbox name="remember" aria-label="記住我" />
             <span className="text-sm font-normal leading-[1.4] text-[var(--tune-text)]">
@@ -153,7 +154,7 @@ export function LoginForm({
           >
             忘記密碼？
           </Link>
-        </div>
+        </div> */}
 
         <Button
           type="submit"
