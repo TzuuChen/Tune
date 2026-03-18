@@ -1,3 +1,4 @@
+import Error from "../error";
 export default function GuitarsPage() {
-  return <div>GuitarsPage</div>;
+  return <Error />;
 }

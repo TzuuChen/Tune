@@ -6,6 +6,7 @@ import { useAuthStore } from "@/store/auth";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { RegisterForm } from "@/components/auth/RegisterForm";
 import { cn } from "@/lib/utils";
+import { AddEffectDialog } from "./effects/components/add";
 
 type AuthFormMode = "login" | "register";
 
@@ -54,12 +55,7 @@ export default function Home() {
               開始管理你的效果器、音箱與吉他吧。
             </p>
             <div className="flex flex-wrap gap-3">
-              <Link
-                href="/effects"
-                className="inline-flex h-12 items-center justify-center rounded-md bg-[var(--tune-primary)] px-6 text-base font-medium text-white hover:bg-[#0043ce] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tune-primary)] focus-visible:ring-offset-2"
-              >
-                新增效果器
-              </Link>
+              <AddEffectDialog className="inline-flex h-12 items-center justify-center rounded-md border border-[var(--tune-border)] bg-[var(--tune-primary)] text-white px-6 text-base font-medium hover:bg-[var(--tune-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tune-primary)] focus-visible:ring-offset-2" />
               <Link
                 href="/amps"
                 className="inline-flex h-12 items-center justify-center rounded-md border border-[var(--tune-border)] bg-white px-6 text-base font-medium text-[var(--tune-text)] hover:bg-[var(--tune-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tune-primary)] focus-visible:ring-offset-2"
