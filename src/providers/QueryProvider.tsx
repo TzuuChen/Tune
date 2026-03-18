@@ -6,9 +6,9 @@ import { createClient } from "@/lib/supabase/client";
 
 export function QueryProvider({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
-  const supabase = createClient();
 
   useEffect(() => {
+    const supabase = createClient();
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT' || event === 'SIGNED_IN') {
         queryClient.clear()
