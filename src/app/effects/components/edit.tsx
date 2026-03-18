@@ -41,7 +41,7 @@ const editEffectSchema = z.object({
   brandId: z.string().min(1, "品牌不能為空"),
   product_name: z.string().min(1, "型號不能為空"),
   review: z.string().optional(),
-  picture: z.instanceof(FileList).optional().nullable(),
+  picture: z.any().optional().nullable(),
 });
 
 export function EditEffectDialog({ className, effect }: { className?: string, effect: Gear }) {
