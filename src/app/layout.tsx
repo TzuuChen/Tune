@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 
 import { Header } from "@/components/header/header";
 import { AuthHydration } from "@/components/auth/AuthHydration";
+import { QueryProvider } from "@/providers/QueryProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
@@ -33,9 +35,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased `}
       >
-        <AuthHydration />
-        <Header />
-        {children}
+        <QueryProvider>
+          <AuthHydration />
+          <Toaster />
+          <Header />
+          {children}
+        </QueryProvider>
       </body>
     </html>
   );

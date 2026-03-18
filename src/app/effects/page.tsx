@@ -2,48 +2,38 @@
 import { useEffect, useState, useCallback } from "react";
 import { AddEffectDialog } from "./components/add";
 import { EffectCard } from "./components/card";
-import { createClient } from "@/lib/supabase/client";
-import { useAuthStore } from "@/store/auth";
-import { Gear } from "./type";
+import { useGear } from "@/api/gear";
+import { Gear } from "@/api/gear/type";
 
 
 export default function EffectsPage() {
-  const [effects, setEffects] = useState<Gear[]>([]);
-  const { user } = useAuthStore();
-
+  const [effects, setEffects] = useState<Gear[] | null>(null);
+  const { data: gearData } = useGear();
 
 
   const fetchEffects = useCallback(async () => {
-    if (!user) {
-      setEffects([]);
-      return;
-    }
-    const supabase = createClient();
-    const { data, error } = await supabase
-      .from("gear")
-      .select("id, menu_id, product_name, review, brands(id,name)")
-      .eq("user_id", user.id)
-      .order("id", { ascending: false });
-    if (error) {
-      console.error(error);
-      return;
-    }
-    setEffects((data ?? []) as unknown as Gear[]);
-  }, [user?.id]);
+    setEffects(gearData as unknown as Gear[] | null);
+  }, [gearData]);
 
 
   useEffect(() => {
     fetchEffects();
-  }, [user?.id]);
+  }, [gearData]);
 
   return (
     <div className="px-10">
       <div className="flex justify-end mb-4">
-        <AddEffectDialog fetchEffects={fetchEffects} />
+        <AddEffectDialog />
       </div>
-      <div className="grid grid-cols-1 gap-4">{effects.map((effect) => (
-        <EffectCard key={effect.id} effect={effect} fetchEffects={fetchEffects} />
-      ))}</div>
+      <div className="grid grid-cols-1 gap-4">{effects?.map((effect) => (
+        <EffectCard key={effect.id} effect={effect} />
+      ))}
+      </div>
+      {effects?.length === 0 && (
+        <div className="flex justify-center items-center h-full">
+          <p className="text-gray-500">該買第一顆效果器了吧！</p>
+        </div>
+      )}
     </div>
   );
 }

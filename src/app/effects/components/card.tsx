@@ -3,22 +3,24 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { EditEffectDialog } from "./edit";
-import { Gear } from "../type"; 
+import { Gear } from "@/api/gear/type";
+import { Button } from "@/components/ui/button";
+import { delGear } from "@/api/gear";
+import { TrashIcon } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export type EffectCardProps = {
   effect: Gear;
-  imageUrl?: string | null;
   className?: string;
-  fetchEffects?: () => void;
 };
 
 export function EffectCard({
   className,
   effect,
-  imageUrl,
-  fetchEffects,
 }: EffectCardProps) {
-  const { id, menu_id, product_name, review, brands } = effect;
+  const { product_name, review, brands, picture } = effect;
+  const queryClient = useQueryClient();
   return (
     <article
       className={cn(
@@ -28,10 +30,10 @@ export function EffectCard({
     >
       {/* 左側：圖片（與 Figma 版型一致） */}
       <div className="relative h-80 w-80 shrink-0 overflow-hidden rounded-lg bg-[var(--tune-bg)]">
-        <EditEffectDialog className="absolute top-5 left-3" effect={{ id, menu_id, product_name, review, brands }} fetchEffects={fetchEffects} />
-        {imageUrl ? (
+        <EditEffectDialog className="absolute top-5 left-5 z-10" effect={effect} />
+        {picture ? (
           <Image
-            src={imageUrl}
+            src={picture}
             alt=""
             fill
             className="object-cover"
@@ -42,6 +44,15 @@ export function EffectCard({
             無圖
           </div>
         )}
+        <Button variant="outline" size="icon" className="absolute top-5 right-5 bg-red-500 text-white" onClick={async () => {
+          await delGear(effect.id)
+          toast.success("刪除成功", {
+            description: "效果器已成功刪除",
+          })
+          queryClient.invalidateQueries({ queryKey: ['gear'] })
+        }}>
+          <TrashIcon className="size-4" />
+        </Button>
       </div>
 
       {/* 右側：第一列 品牌＋型號，第二列 描述；右上可放 action */}

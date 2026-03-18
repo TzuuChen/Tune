@@ -1,11 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useAuthStore } from "@/store/auth";
-import { Brand } from "@/type/brand";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -31,32 +30,41 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Gear } from "../type";
+import { toast } from "sonner";
+
+import { useAuthStore } from "@/store/auth";
+import { Brand } from "@/api/brands/type";
+import { useBrands } from "@/api/brands";
+import { Gear } from "@/api/gear/type";
 
 const editEffectSchema = z.object({
   brandId: z.string().min(1, "品牌不能為空"),
   product_name: z.string().min(1, "型號不能為空"),
   review: z.string().optional(),
+  picture: z.instanceof(FileList).optional().nullable(),
 });
 
-export function EditEffectDialog({ className, effect, fetchEffects }: { className?: string, effect: Gear, fetchEffects?: () => void }) {
+export function EditEffectDialog({ className, effect }: { className?: string, effect: Gear }) {
   const [brands, setBrands] = useState<Brand[]>([]);
   const [open, setOpen] = useState(false);
   const { user } = useAuthStore();
   const { handleSubmit, formState: { errors, isSubmitting }, register, reset, control } = useForm<z.infer<typeof editEffectSchema>>({
     resolver: zodResolver(editEffectSchema),
     defaultValues: {
-      brandId: String(effect.brands.id),
+      brandId: String(effect.brands?.id ?? ""),
       product_name: effect.product_name,
       review: effect.review ?? "",
+      picture: null,
     },
   });
+  const { data: brandsData } = useBrands();
+  const queryClient = useQueryClient();
 
   // 每次打開 dialog 或 effect 更新時，表單同步為最新資料
   useEffect(() => {
     if (open) {
       reset({
-        brandId: String(effect.brands.id),
+        brandId: String(effect.brands?.id ?? ""),
         product_name: effect.product_name,
         review: effect.review ?? "",
       });
@@ -78,29 +86,15 @@ export function EditEffectDialog({ className, effect, fetchEffects }: { classNam
     }
     reset();
     setOpen(false);
-    fetchEffects?.();
+    queryClient.invalidateQueries({ queryKey: ['gear'] });
+    toast.success("編輯成功", {
+      description: "效果器已成功編輯",
+    })
   };
 
   useEffect(() => {
-    const fetchBrands = async () => {
-      const supabase = createClient();
-      const { data, error } = await supabase.from("brands").select("id, name").order("name");
-
-      if (error) {
-        console.error(error);
-        return;
-      }
-
-      const normalizedBrands: Brand[] = (data ?? []).map((brand) => ({
-        id: brand.id,
-        name: brand.name,
-      }));
-
-      setBrands(normalizedBrands);
-    };
-
-    fetchBrands();
-  }, []);
+    setBrands(brandsData ?? []);
+  }, [brandsData]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -120,6 +114,10 @@ export function EditEffectDialog({ className, effect, fetchEffects }: { classNam
           </DialogHeader>
 
           <FieldGroup className="mt-4">
+            <Field>
+              <Label htmlFor="picture">圖片</Label>
+              <Input id="picture" type="file" {...register("picture")}/>
+            </Field>
             <Field>
               <Label htmlFor="brand">品牌<span className="text-destructive">*</span></Label>
               <Controller

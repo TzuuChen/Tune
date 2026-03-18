@@ -5,7 +5,13 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuthStore } from "@/store/auth";
-import { Brand } from "@/type/brand";
+import { Brand } from "@/api/brands/type";
+
+import { useBrands } from "@/api/brands";
+import { useQueryClient } from "@tanstack/react-query";
+import { uploadImg } from "@/api/uploadImg";
+import { getImgUrl } from "@/api/uploadImg";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -30,11 +36,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 
 const addEffectSchema = z.object({
   brandId: z.string().min(1, "品牌不能為空"),
   product_name: z.string().min(1, "型號不能為空"),
   review: z.string().optional(),
+  // 不用 FileList：SSR 時不存在，會報 FileList is not defined
+  picture: z.any().optional().nullable(),
 });
 
 export function AddEffectDialog({ className, fetchEffects }: { className?: string, fetchEffects?: () => void }) {
@@ -47,45 +56,51 @@ export function AddEffectDialog({ className, fetchEffects }: { className?: strin
       brandId: "",
       product_name: "",
       review: "",
+      picture: null,
     },
   });
+  const { data: brandsData } = useBrands();
+  const queryClient = useQueryClient();
   const onSubmit = async (data: z.infer<typeof addEffectSchema>) => {
+    let pictureUrl: string | null = null;
+    try {
+      const file = data.picture?.length ? data.picture[0] : data.picture;
+      if (file instanceof File) {
+        const path = await uploadImg(file);
+        pictureUrl = getImgUrl(path);
+      }
+    } catch (e) {
+      toast.error("圖片上傳失敗", { description: e instanceof Error ? e.message : "請稍後再試" });
+      return;
+    }
+
     const supabase = createClient();
     const { error } = await supabase
-      .from('gear')
+      .from("gear")
       .insert([
-        { user_id: user?.id, menu_id: 1, brand_id: Number(data.brandId), product_name: data.product_name, review: data.review },
+        {
+          user_id: user?.id,
+          menu_id: 1,
+          brand_id: Number(data.brandId),
+          product_name: data.product_name,
+          review: data.review ?? null,
+          picture: pictureUrl,
+        },
       ])
-      .select()
+      .select();
     if (error) {
-      console.error(error);
+      toast.error("新增失敗", { description: error.message });
       return;
     }
     reset();
     setOpen(false);
-    fetchEffects?.();
+    toast.success("新增成功", { description: "效果器已成功新增" });
+    queryClient.invalidateQueries({ queryKey: ["gear"] });
   };
 
   useEffect(() => {
-    const fetchBrands = async () => {
-      const supabase = createClient();
-      const { data, error } = await supabase.from("brands").select("id, name").order("name");
-
-      if (error) {
-        console.error(error);
-        return;
-      }
-
-      const normalizedBrands: Brand[] = (data ?? []).map((brand) => ({
-        id: brand.id,
-        name: brand.name,
-      }));
-
-      setBrands(normalizedBrands);
-    };
-
-    fetchBrands();
-  }, []);
+    setBrands(brandsData ?? []);
+  }, [brandsData]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -105,6 +120,10 @@ export function AddEffectDialog({ className, fetchEffects }: { className?: strin
           </DialogHeader>
 
           <FieldGroup className="mt-4">
+            <Field>
+              <Label htmlFor="picture">圖片</Label>
+              <Input id="picture" type="file" {...register("picture")}/>
+            </Field>
             <Field>
               <Label htmlFor="brand">品牌<span className="text-destructive">*</span></Label>
               <Controller
