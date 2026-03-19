@@ -55,7 +55,7 @@ export default function Home() {
               開始管理你的效果器、音箱與吉他吧。
             </p>
             <div className="flex flex-wrap gap-3">
-              <AddEffectDialog className="inline-flex h-12 items-center justify-center rounded-md border border-[var(--tune-border)] bg-[var(--tune-primary)] text-white px-6 text-base font-medium hover:bg-[var(--tune-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tune-primary)] focus-visible:ring-offset-2" />
+              <AddEffectDialog className="inline-flex h-12 items-center justify-center rounded-md border border-[var(--tune-border)] bg-white px-6 text-base font-medium text-[var(--tune-text)] hover:bg-[var(--tune-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tune-primary)] focus-visible:ring-offset-2 hover:text-white hover:bg-[var(--tune-primary)] cursor-pointer" />
               <Link
                 href="/amps"
                 className="inline-flex h-12 items-center justify-center rounded-md border border-[var(--tune-border)] bg-white px-6 text-base font-medium text-[var(--tune-text)] hover:bg-[var(--tune-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tune-primary)] focus-visible:ring-offset-2"
