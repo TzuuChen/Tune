@@ -22,11 +22,13 @@ import { useIsMobile } from "@/hooks/use-is-mobile";
 export type EffectCardProps = {
   effect: Gear;
   className?: string;
+  onDeleteSuccess: () => void;
 };
 
 export function EffectCard({
   className,
   effect,
+  onDeleteSuccess
 }: EffectCardProps) {
   const { product_name, review, brands, picture } = effect;
   const queryClient = useQueryClient();
@@ -75,6 +77,7 @@ export function EffectCard({
                 description: "效果器已成功刪除",
               });
               queryClient.invalidateQueries({ queryKey: ["gear"] });
+              onDeleteSuccess();
             }}
           >
             <TrashIcon className="size-4" />
