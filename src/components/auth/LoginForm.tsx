@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -42,14 +41,13 @@ export function LoginForm({
   const initialEmail =
     typeof window !== "undefined" ? localStorage.getItem("email") || "" : "";
 
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const [message, setMessage] = useState<{
     type: "error";
     text: string;
   } | null>(null);
-  const [remember, setRemember] = useState<boolean>(initialEmail !== "");
+  const [remember, setRemember] = useState<boolean>(false);
 
-  const router = useRouter();
   const { setUser } = useAuthStore();
 
   const {
@@ -86,12 +84,12 @@ export function LoginForm({
       setMessage({ type: "error", text: error.message });
       return;
     }
+
     if (remember) {
       localStorage.setItem("email", data.email);
     } else {
       localStorage.removeItem("email");
     }
-    router.refresh();
   };
 
   return (
@@ -161,10 +159,10 @@ export function LoginForm({
         <div className="flex items-center justify-between gap-4">
           <label className="flex cursor-pointer items-center gap-2">
             <Checkbox
-              name="remember"
+              id="remember"
               aria-label="記住我"
               checked={remember}
-              onCheckedChange={(checked) => setRemember(checked === true)}
+              onCheckedChange={() => setRemember((v) => !v)}
             />
             <span className="text-sm font-normal leading-[1.4] text-[var(--tune-text)]">
               記住我
