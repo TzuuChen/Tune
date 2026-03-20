@@ -1,12 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuthStore } from "@/store/auth";
-import { Brand } from "@/api/brands/type";
-
 import { useBrands } from "@/api/brands";
 import { useQueryClient } from "@tanstack/react-query";
 import { uploadImg } from "@/api/uploadImg";
@@ -46,8 +44,7 @@ const addEffectSchema = z.object({
   picture: z.any().optional().nullable(),
 });
 
-export function AddEffectDialog({ className, fetchEffects }: { className?: string, fetchEffects?: () => void }) {
-  const [brands, setBrands] = useState<Brand[]>([]);
+export function AddEffectDialog({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);
   const { user } = useAuthStore();
   const { handleSubmit, formState: { errors, isSubmitting }, register, reset, control } = useForm<z.infer<typeof addEffectSchema>>({
@@ -98,8 +95,8 @@ export function AddEffectDialog({ className, fetchEffects }: { className?: strin
     toast.success("新增成功", { description: "效果器已成功新增" });
   };
 
-  useEffect(() => {
-    setBrands(brandsData ?? []);
+  const brands = useMemo(() => {
+    return brandsData ?? [];
   }, [brandsData]);
 
   return (

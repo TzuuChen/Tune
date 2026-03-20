@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm, Controller } from "react-hook-form";
@@ -33,7 +33,6 @@ import {
 import { toast } from "sonner";
 
 import { useAuthStore } from "@/store/auth";
-import { Brand } from "@/api/brands/type";
 import { useBrands } from "@/api/brands";
 import { Gear } from "@/api/gear/type";
 
@@ -45,7 +44,6 @@ const editEffectSchema = z.object({
 });
 
 export function EditEffectDialog({ className, effect }: { className?: string, effect: Gear }) {
-  const [brands, setBrands] = useState<Brand[]>([]);
   const [open, setOpen] = useState(false);
   const { user } = useAuthStore();
   const { handleSubmit, formState: { errors, isSubmitting }, register, reset, control } = useForm<z.infer<typeof editEffectSchema>>({
@@ -92,8 +90,8 @@ export function EditEffectDialog({ className, effect }: { className?: string, ef
     })
   };
 
-  useEffect(() => {
-    setBrands(brandsData ?? []);
+  const brands = useMemo(() => {
+    return brandsData ?? [];
   }, [brandsData]);
 
   return (
