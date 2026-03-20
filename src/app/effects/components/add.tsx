@@ -103,12 +103,15 @@ export function AddEffectDialog({ className, fetchEffects }: { className?: strin
   }, [brandsData]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(open: boolean) => {
+      if (!open) reset();
+      setOpen(open)
+    }}>
       <DialogTrigger asChild className={className}>
         <Button variant="outline">新增效果器</Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-sm">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-sm">
         <form
           onSubmit={handleSubmit(onSubmit)}
         >

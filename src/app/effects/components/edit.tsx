@@ -97,17 +97,20 @@ export function EditEffectDialog({ className, effect }: { className?: string, ef
   }, [brandsData]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(open: boolean) => {
+      if (!open) reset();
+      setOpen(open)
+    }}>
       <DialogTrigger asChild className={className}>
         <Button variant="outline">編輯效果器</Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-sm">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-sm">
         <form
           onSubmit={handleSubmit(onSubmit)}
         >
           <DialogHeader>
-            <DialogTitle>新增效果器</DialogTitle>
+            <DialogTitle>編輯效果器</DialogTitle>
             <DialogDescription className="text-sm">
               請填寫效果器品牌、型號、描述等資訊。
             </DialogDescription>
