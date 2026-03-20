@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm, Controller } from "react-hook-form";
@@ -33,7 +33,6 @@ import {
 import { toast } from "sonner";
 
 import { useAuthStore } from "@/store/auth";
-import { Brand } from "@/api/brands/type";
 import { useBrands } from "@/api/brands";
 import { Gear } from "@/api/gear/type";
 
@@ -45,7 +44,6 @@ const editEffectSchema = z.object({
 });
 
 export function EditEffectDialog({ className, effect }: { className?: string, effect: Gear }) {
-  const [brands, setBrands] = useState<Brand[]>([]);
   const [open, setOpen] = useState(false);
   const { user } = useAuthStore();
   const { handleSubmit, formState: { errors, isSubmitting }, register, reset, control } = useForm<z.infer<typeof editEffectSchema>>({
@@ -92,22 +90,25 @@ export function EditEffectDialog({ className, effect }: { className?: string, ef
     })
   };
 
-  useEffect(() => {
-    setBrands(brandsData ?? []);
+  const brands = useMemo(() => {
+    return brandsData ?? [];
   }, [brandsData]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(open: boolean) => {
+      if (!open) reset();
+      setOpen(open)
+    }}>
       <DialogTrigger asChild className={className}>
         <Button variant="outline">編輯效果器</Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-sm">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-sm">
         <form
           onSubmit={handleSubmit(onSubmit)}
         >
           <DialogHeader>
-            <DialogTitle>新增效果器</DialogTitle>
+            <DialogTitle>編輯效果器</DialogTitle>
             <DialogDescription className="text-sm">
               請填寫效果器品牌、型號、描述等資訊。
             </DialogDescription>
