@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -18,6 +17,7 @@ import {
   InputGroupAddon,
 } from "@/components/ui/input-group";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const loginSchema = z.object({
   email: z.string().min(1, "請輸入電子郵件"),
@@ -38,9 +38,16 @@ export function LoginForm({
   onSwitchToRegister?: () => void;
   className?: string;
 }) {
-  const [showPassword, setShowPassword] = useState(false);
-  const [message, setMessage] = useState<{ type: "error"; text: string } | null>(null);
-  const router = useRouter();
+  const initialEmail =
+    typeof window !== "undefined" ? localStorage.getItem("email") || "" : "";
+
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [message, setMessage] = useState<{
+    type: "error";
+    text: string;
+  } | null>(null);
+  const [remember, setRemember] = useState<boolean>(false);
+
   const { setUser } = useAuthStore();
 
   const {
@@ -49,7 +56,7 @@ export function LoginForm({
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { email: initialEmail, password: "" },
   });
 
   const onSubmit = async (data: LoginFormValues) => {
@@ -67,7 +74,7 @@ export function LoginForm({
       setUser({
         id: u.id,
         email: u.email ?? "",
-        name: (u.user_metadata?.user_name ?? u.user_metadata?.name) ?? "",
+        name: u.user_metadata?.user_name ?? u.user_metadata?.name ?? "",
         created_at: u.created_at ?? "",
         updated_at: u.updated_at ?? "",
       });
@@ -77,7 +84,12 @@ export function LoginForm({
       setMessage({ type: "error", text: error.message });
       return;
     }
-    router.refresh();
+
+    if (remember) {
+      localStorage.setItem("email", data.email);
+    } else {
+      localStorage.removeItem("email");
+    }
   };
 
   return (
@@ -91,7 +103,7 @@ export function LoginForm({
         <p
           className={cn(
             "rounded-md px-3 py-2 text-sm",
-            message.type === "error" && "bg-destructive/10 text-destructive"
+            message.type === "error" && "bg-destructive/10 text-destructive",
           )}
         >
           {message.text}
@@ -111,7 +123,9 @@ export function LoginForm({
               {...register("email")}
             />
             {errors.email && (
-              <p className="mt-1 text-xs text-destructive">{errors.email.message}</p>
+              <p className="mt-1 text-xs text-destructive">
+                {errors.email.message}
+              </p>
             )}
           </Field>
           <Field>
@@ -134,26 +148,27 @@ export function LoginForm({
               </InputGroupAddon>
             </InputGroup>
             {errors.password && (
-              <p className="mt-1 text-xs text-destructive">{errors.password.message}</p>
+              <p className="mt-1 text-xs text-destructive">
+                {errors.password.message}
+              </p>
             )}
           </Field>
         </FieldGroup>
 
         {/* 忘記密碼功能待實作 */}
-        {/* <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center justify-between gap-4">
           <label className="flex cursor-pointer items-center gap-2">
-            <Checkbox name="remember" aria-label="記住我" />
+            <Checkbox
+              id="remember"
+              aria-label="記住我"
+              checked={remember}
+              onCheckedChange={() => setRemember((v) => !v)}
+            />
             <span className="text-sm font-normal leading-[1.4] text-[var(--tune-text)]">
               記住我
             </span>
           </label>
-          <Link
-            href="#"
-            className="text-sm font-normal leading-[1.4] text-[var(--tune-primary-dark)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tune-primary)] focus-visible:ring-offset-2"
-          >
-            忘記密碼？
-          </Link>
-        </div> */}
+        </div>
 
         <Button
           type="submit"
@@ -165,7 +180,10 @@ export function LoginForm({
       </form>
       {showRegisterLink && (
         <>
-          <div className="h-px w-full shrink-0 bg-[var(--tune-card-border)]" role="separator" />
+          <div
+            className="h-px w-full shrink-0 bg-[var(--tune-card-border)]"
+            role="separator"
+          />
           <p className="text-center text-sm font-normal leading-[1.4] text-[var(--tune-primary-dark)]">
             {onSwitchToRegister ? (
               <button
