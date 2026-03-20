@@ -94,8 +94,8 @@ export function AddEffectDialog({ className, fetchEffects }: { className?: strin
     }
     reset();
     setOpen(false);
-    toast.success("新增成功", { description: "效果器已成功新增" });
     queryClient.invalidateQueries({ queryKey: ["gear"] });
+    toast.success("新增成功", { description: "效果器已成功新增" });
   };
 
   useEffect(() => {
